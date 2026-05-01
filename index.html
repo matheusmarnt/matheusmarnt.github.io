@@ -115,7 +115,7 @@
       <div class="max-w-4xl mx-auto px-6" x-data="{ 
         playing: false,
         score: 0,
-        highScore: 0,
+        highScore: localStorage.getItem('snake_highscore') || 0,
         canvas: null,
         ctx: null,
         box: 20,
@@ -149,6 +149,7 @@
         
         direction(event) {
           let key = event.keyCode;
+          if([37, 38, 39, 40].includes(key)) event.preventDefault(); // Prevent scroll
           if(key == 37 && this.d != 'RIGHT') this.d = 'LEFT';
           else if(key == 38 && this.d != 'DOWN') this.d = 'UP';
           else if(key == 39 && this.d != 'LEFT') this.d = 'RIGHT';
@@ -161,20 +162,46 @@
           }
           return false;
         },
+
+        roundRect(x, y, w, h, r) {
+          if (w < 2 * r) r = w / 2;
+          if (h < 2 * r) r = h / 2;
+          this.ctx.beginPath();
+          this.ctx.moveTo(x + r, y);
+          this.ctx.arcTo(x + w, y, x + w, y + h, r);
+          this.ctx.arcTo(x + w, y + h, x, y + h, r);
+          this.ctx.arcTo(x, y + h, x, y, r);
+          this.ctx.arcTo(x, y, x + w, y, r);
+          this.ctx.closePath();
+          this.ctx.fill();
+        },
         
         draw() {
-          this.ctx.fillStyle = '#0f172a';
+          this.ctx.fillStyle = '#050505';
           this.ctx.fillRect(0, 0, 400, 400);
           
-          for(let i = 0; i < this.snake.length; i++) {
-            this.ctx.fillStyle = (i == 0) ? '#00f0ff' : '#06b6d4';
-            this.ctx.fillRect(this.snake[i].x, this.snake[i].y, this.box, this.box);
-            this.ctx.strokeStyle = '#0f172a';
-            this.ctx.strokeRect(this.snake[i].x, this.snake[i].y, this.box, this.box);
-          }
-          
+          // Draw Food (rounded)
           this.ctx.fillStyle = '#10b981';
-          this.ctx.fillRect(this.food.x, this.food.y, this.box, this.box);
+          this.roundRect(this.food.x + 2, this.food.y + 2, this.box - 4, this.box - 4, 8);
+          
+          // Draw Snake with tapering and rounding
+          for(let i = 0; i < this.snake.length; i++) {
+            // Calculate size for tapering (head is 100%, tail is min 40%)
+            let taperFactor = Math.max(0.4, 1 - (i / this.snake.length) * 0.6);
+            let size = this.box * taperFactor;
+            let offset = (this.box - size) / 2;
+            
+            this.ctx.fillStyle = (i == 0) ? '#00f0ff' : `rgba(6, 182, 212, ${taperFactor})`;
+            this.roundRect(this.snake[i].x + offset, this.snake[i].y + offset, size, size, size / 2);
+            
+            // Add a little glow to head
+            if(i === 0) {
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#00f0ff';
+                this.roundRect(this.snake[i].x + offset, this.snake[i].y + offset, size, size, size / 2);
+                this.ctx.shadowBlur = 0;
+            }
+          }
           
           let snakeX = this.snake[0].x;
           let snakeY = this.snake[0].y;
@@ -199,7 +226,10 @@
           if(snakeX < 0 || snakeX >= 400 || snakeY < 0 || snakeY >= 400 || this.collision(newHead, this.snake)) {
             clearInterval(this.gameInterval);
             this.playing = false;
-            if(this.score > this.highScore) this.highScore = this.score;
+            if(this.score > this.highScore) {
+                this.highScore = this.score;
+                localStorage.setItem('snake_highscore', this.highScore);
+            }
             return;
           }
           
