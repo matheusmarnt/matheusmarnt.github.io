@@ -14,6 +14,63 @@
         Alpine.data('portfolio', () => ({
             mouseX: 0,
             mouseY: 0,
+            lang: localStorage.getItem('pref_lang') || (navigator.language.startsWith('pt') ? 'pt' : 'en'),
+            year: new Date().getFullYear(),
+            translations: {
+                pt: {
+                    nav_home: '~/inicio',
+                    nav_about: '~/sobre',
+                    nav_stack: '~/stack',
+                    nav_projects: '~/projetos',
+                    nav_contact: '~/contato',
+                    status_available: 'Status: Disponível',
+                    hero_greeting: 'Olá, sou',
+                    hero_cta_projects: '[ Executar Projetos ]',
+                    hero_cta_contact: 'ping --contato',
+                    about_title: 'Sobre_Mim',
+                    about_focus: 'Inovação Pública & Govtech',
+                    about_bio: 'Engenheiro apaixonado por criar soluções técnicas de alto padrão, com forte atuação em inovação pública e tecnologia para governos.',
+                    stack_title: 'Stack_Técnica',
+                    projects_title: 'SELECT * FROM Projetos',
+                    contact_title: 'Contato',
+                    contact_msg: '// Init connection request',
+                    game_title: 'SNAKE_OS v2.0',
+                    game_auth: '[ AUTH & START ]',
+                    game_placeholder: 'USUÁRIO_ID',
+                    game_hint: '// Use arrow keys to navigate',
+                    game_top: 'TOP_10_AGENTS'
+                },
+                en: {
+                    nav_home: '~/home',
+                    nav_about: '~/about',
+                    nav_stack: '~/stack',
+                    nav_projects: '~/projects',
+                    nav_contact: '~/contact',
+                    status_available: 'Status: Available',
+                    hero_greeting: "Hi, I'm",
+                    hero_cta_projects: '[ Run Projects ]',
+                    hero_cta_contact: 'ping --contact',
+                    about_title: 'About_Me',
+                    about_focus: 'Public Innovation & Govtech',
+                    about_bio: 'Engineer passionate about creating high-standard technical solutions, with strong experience in public innovation and technology for governments.',
+                    stack_title: 'Tech_Stack',
+                    projects_title: 'SELECT * FROM Projects',
+                    contact_title: 'Contact',
+                    contact_msg: '// Init connection request',
+                    game_title: 'SNAKE_OS v2.0',
+                    game_auth: '[ AUTH & START ]',
+                    game_placeholder: 'USER_ID',
+                    game_hint: '// Use arrow keys to navigate',
+                    game_top: 'TOP_10_AGENTS'
+                }
+            },
+            t(key) {
+                return this.translations[this.lang][key] || key;
+            },
+            setLang(l) {
+                this.lang = l;
+                localStorage.setItem('pref_lang', l);
+            },
             updateMouse(e) {
                 this.mouseX = e.clientX;
                 this.mouseY = e.clientY;
@@ -239,12 +296,21 @@
   <nav x-data="{ active: 'inicio' }" @active-section.window="active = $event.detail" class="border-b border-cyan-900/30 bg-slate-950/80 backdrop-blur-md fixed w-full z-50 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
     <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
       <a href="#inicio" class="text-2xl font-bold text-white font-mono tracking-tight"><span class="text-cyan-400">&gt;</span> Matheus_Mariano</a>
-      <div class="hidden md:flex gap-8 text-sm font-medium font-mono">
-        <a href="#inicio" @click="active = 'inicio'" :class="active === 'inicio' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'">~/inicio</a>
-        <a href="#sobre" @click="active = 'sobre'" :class="active === 'sobre' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'">~/sobre</a>
-        <a href="#stack" @click="active = 'stack'" :class="active === 'stack' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'">~/stack</a>
-        <a href="#projetos" @click="active = 'projetos'" :class="active === 'projetos' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'">~/projetos</a>
-        <a href="#contato" @click="active = 'contato'" :class="active === 'contato' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'">~/contato</a>
+      
+      <div class="flex items-center gap-8">
+        <div class="hidden md:flex gap-8 text-sm font-medium font-mono">
+          <a href="#inicio" @click="active = 'inicio'" :class="active === 'inicio' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'" x-text="t('nav_home')"></a>
+          <a href="#sobre" @click="active = 'sobre'" :class="active === 'sobre' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'" x-text="t('nav_about')"></a>
+          <a href="#stack" @click="active = 'stack'" :class="active === 'stack' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'" x-text="t('nav_stack')"></a>
+          <a href="#projetos" @click="active = 'projetos'" :class="active === 'projetos' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'" x-text="t('nav_projects')"></a>
+          <a href="#contato" @click="active = 'contato'" :class="active === 'contato' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'" x-text="t('nav_contact')"></a>
+        </div>
+
+        <!-- Language Toggle -->
+        <div class="flex gap-2 font-mono text-xs border border-slate-800 rounded-lg p-1 bg-slate-900/50">
+          <button @click="setLang('pt')" :class="lang === 'pt' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-500'" class="px-2 py-1 rounded transition-all">PT</button>
+          <button @click="setLang('en')" :class="lang === 'en' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-500'" class="px-2 py-1 rounded transition-all">EN</button>
+        </div>
       </div>
     </div>
   </nav>
@@ -258,23 +324,21 @@
         
         <div x-show="shown" x-transition:enter="transition ease-out duration-1000" x-transition:enter-start="opacity-0 -translate-x-12" x-transition:enter-end="opacity-100 translate-x-0">
           <div class="inline-block px-4 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-mono mb-6 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-            <i class="fa-solid fa-circle-dot animate-pulse mr-2"></i> Status: Disponível
+            <i class="fa-solid fa-circle-dot animate-pulse mr-2"></i> <span x-text="t('status_available')"></span>
           </div>
           <h1 class="text-6xl font-bold leading-tight mb-4">
-            Olá, sou <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)]">Matheus Mariano</span>
+            <span x-text="t('hero_greeting')"></span> <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)]">Matheus Mariano</span>
           </h1>
-          <div x-data="typingEffect('Engenheiro_de_Software')">
+          <div x-data="typingEffect('Engenheiro_de_Software')" :key="lang">
             <p class="text-2xl text-slate-400 mb-8 font-mono border-l-2 border-cyan-500 pl-4">
               > <span x-text="text"></span><span class="animate-pulse text-cyan-400">_</span>
             </p>
           </div>
           
           <div class="flex flex-wrap gap-4 font-mono">
-            <a href="#projetos" class="bg-cyan-500/10 border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] px-8 py-3 rounded-lg font-semibold transition-all duration-300">
-              [ Executar Projetos ]
+            <a href="#projetos" class="bg-cyan-500/10 border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] px-8 py-3 rounded-lg font-semibold transition-all duration-300" x-text="t('hero_cta_projects')">
             </a>
-            <a href="#contato" class="border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 px-8 py-3 rounded-lg font-semibold transition-all duration-300">
-              ping --contato
+            <a href="#contato" class="border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 px-8 py-3 rounded-lg font-semibold transition-all duration-300" x-text="t('hero_cta_contact')">
             </a>
           </div>
         </div>
@@ -300,17 +364,16 @@
             <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-900 rounded"></canvas>
             
             <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm px-6 text-center">
-              <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest">SNAKE_OS v2.0</h3>
+              <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest" x-text="t('game_title')"></h3>
               
               <div class="w-full max-w-xs mb-6">
-                <input type="text" x-model="playerName" placeholder="USUÁRIO_ID" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 transition-all text-center uppercase">
+                <input type="text" x-model="playerName" :placeholder="t('game_placeholder')" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 transition-all text-center uppercase">
               </div>
 
-              <button @click="start()" class="w-full max-w-xs px-8 py-4 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] font-bold">
-                [ AUTH & START ]
+              <button @click="start()" class="w-full max-w-xs px-8 py-4 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] font-bold" x-text="t('game_auth')">
               </button>
               
-              <p class="mt-6 text-slate-500 text-xs font-mono animate-pulse">// Use arrow keys to navigate</p>
+              <p class="mt-6 text-slate-500 text-xs font-mono animate-pulse" x-text="t('game_hint')"></p>
             </div>
 
             <!-- In-game score overlay -->
@@ -323,7 +386,7 @@
           <div class="bg-slate-900/50 p-6 font-mono">
             <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
                 <i class="fa-solid fa-trophy text-amber-500"></i>
-                <h4 class="text-sm font-bold text-slate-300">TOP_10_AGENTS</h4>
+                <h4 class="text-sm font-bold text-slate-300" x-text="t('game_top')"></h4>
             </div>
             <div class="space-y-3">
                 <template x-for="(entry, index) in leaderboard">
@@ -345,7 +408,7 @@
     <section id="sobre" x-intersect:enter="$dispatch('active-section', 'sobre')" class="py-24 relative">
       <div class="max-w-5xl mx-auto px-6" x-data="{ shown: false }" x-intersect.margin.-10%="shown = true">
         <div class="flex items-center gap-4 mb-12">
-          <h2 class="text-4xl font-bold font-mono text-white"><span class="text-emerald-400">#</span> Sobre_Mim</h2>
+          <h2 class="text-4xl font-bold font-mono text-white"><span class="text-emerald-400">#</span> <span x-text="t('about_title')"></span></h2>
           <div class="h-px bg-slate-800 flex-grow"></div>
         </div>
 
@@ -421,7 +484,7 @@
       <div class="max-w-6xl mx-auto px-6 relative" x-data="{ shown: false }" x-intersect.margin.-10%="shown = true">
         <div class="flex items-center justify-end gap-4 mb-16">
           <div class="h-px bg-slate-800 flex-grow"></div>
-          <h2 class="text-4xl font-bold font-mono text-white">Stack_<span class="text-cyan-400">Técnica</span>()</h2>
+          <h2 class="text-4xl font-bold font-mono text-white" x-html="`${t('stack_title')}()`"></h2>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
@@ -450,7 +513,7 @@
     <section id="projetos" x-intersect:enter="$dispatch('active-section', 'projetos')" class="py-24 relative">
       <div class="max-w-6xl mx-auto px-6" x-data="{ shown: false }" x-intersect.margin.-10%="shown = true">
         <div class="flex items-center gap-4 mb-16">
-          <h2 class="text-4xl font-bold font-mono text-white"><span class="text-emerald-400">SELECT</span> * FROM Projetos</h2>
+          <h2 class="text-4xl font-bold font-mono text-white" x-text="t('projects_title')"></h2>
           <div class="h-px bg-slate-800 flex-grow"></div>
         </div>
 
@@ -487,10 +550,9 @@
       <div class="absolute bottom-0 right-0 w-96 h-96 bg-cyan-600/10 rounded-full blur-[100px] -z-10"></div>
       <div class="max-w-3xl mx-auto px-6 text-center" x-data="{ shown: false }" x-intersect="shown = true">
         <h2 class="text-5xl font-bold font-mono text-white mb-6" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-y-8">
-          <span class="animate-pulse text-cyan-500">_</span>Contato
+          <span class="animate-pulse text-cyan-500">_</span><span x-text="t('contact_title')"></span>
         </h2>
-        <p class="text-slate-400 mb-12 font-mono text-sm" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0">
-          // Init connection request
+        <p class="text-slate-400 mb-12 font-mono text-sm" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0" x-text="t('contact_msg')">
         </p>
 
         <div class="grid sm:grid-cols-3 gap-6" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-300" x-transition:enter-start="opacity-0 translate-y-12">
@@ -512,7 +574,7 @@
   </main>
 
   <footer class="bg-slate-950 border-t border-cyan-900/30 py-8 text-center text-sm text-slate-500 font-mono">
-    <p>System.exit(0) // © 2026 Matheus Mariano • Gurupi, TO</p>
+    <p>System.exit(0) // © <span x-text="year"></span> Matheus Mariano • Gurupi, TO</p>
   </footer>
 
 </body>
