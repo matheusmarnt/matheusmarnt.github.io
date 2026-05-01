@@ -355,7 +355,7 @@
           <h1 class="text-6xl font-bold leading-tight mb-4">
             <span x-text="t('hero_greeting')"></span> <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)]">Matheus Mariano</span>
           </h1>
-          <div x-data="typingEffect('Engenheiro_de_Software')" :key="lang">
+          <div x-data="typingEffect(t('hero_role'))" :key="lang">
             <p class="text-2xl text-slate-400 mb-8 font-mono border-l-2 border-cyan-500 pl-4">
               > <span x-text="text"></span><span class="animate-pulse text-cyan-400">_</span>
             </p>
