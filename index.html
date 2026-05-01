@@ -40,6 +40,9 @@
                     about_loc_gov: 'Prefeitura de Gurupi',
                     about_role_startup: 'Sócio-proprietário',
                     about_loc_startup: 'Axigov Govtech',
+                    edu_postgrad: 'Pós-graduação em Inteligência Artificial e Machine Learning',
+                    edu_tech: 'Tecnólogo Superior em Análise e Desenvolvimento de Sistemas',
+                    edu_bach: 'Bacharel em Engenharia de Software',
                     stack_title: 'Stack_Técnica',
                     projects_title: 'SELECT * FROM Projetos',
                     projects_featured: 'Projetos em Destaque',
@@ -76,6 +79,9 @@
                     about_loc_gov: 'Gurupi City Hall',
                     about_role_startup: 'Partner-Owner',
                     about_loc_startup: 'Axigov Govtech',
+                    edu_postgrad: 'Postgraduate Degree in Artificial Intelligence and Machine Learning',
+                    edu_tech: 'Associate Degree in Systems Analysis and Development',
+                    edu_bach: 'Bachelor of Software Engineering',
                     stack_title: 'Tech_Stack',
                     projects_title: 'SELECT * FROM Projects',
                     projects_featured: 'Featured Projects',
@@ -103,17 +109,26 @@
             }
         }));
 
-        Alpine.data('typingEffect', (fullText) => ({
+        Alpine.data('typingEffect', (translationKey) => ({
             text: '',
-            fullText: fullText,
+            translationKey: translationKey,
             index: 0,
+            interval: null,
             init() {
-                let interval = setInterval(() => {
-                    if (this.index >= this.fullText.length) {
-                        clearInterval(interval);
+                this.type();
+                this.$watch('lang', () => this.type());
+            },
+            type() {
+                if (this.interval) clearInterval(this.interval);
+                this.text = '';
+                this.index = 0;
+                const fullText = this.t(this.translationKey);
+                this.interval = setInterval(() => {
+                    if (this.index >= fullText.length) {
+                        clearInterval(this.interval);
                         return;
                     }
-                    this.text += this.fullText[this.index];
+                    this.text += fullText[this.index];
                     this.index++;
                 }, 100);
             }
@@ -355,7 +370,7 @@
           <h1 class="text-6xl font-bold leading-tight mb-4">
             <span x-text="t('hero_greeting')"></span> <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)]">Matheus Mariano</span>
           </h1>
-          <div x-data="typingEffect(t('hero_role'))" :key="lang">
+          <div x-data="typingEffect('hero_role')">
             <p class="text-2xl text-slate-400 mb-8 font-mono border-l-2 border-cyan-500 pl-4">
               > <span x-text="text"></span><span class="animate-pulse text-cyan-400">_</span>
             </p>
@@ -450,7 +465,7 @@
               <span class="text-emerald-400">matheus@root</span><span class="text-slate-400">:</span><span class="text-blue-400">~</span>$ cat profile.json<br>
               {<br>
               &nbsp;&nbsp;<span class="text-cyan-300">"name"</span>: <span class="text-amber-300">"Matheus Mariano"</span>,<br>
-              &nbsp;&nbsp;<span class="text-cyan-300">"role"</span>: <span class="text-amber-300">"</span><span class="text-amber-300" x-data="typingEffect(t('about_profile_role'))" x-text="text" :key="lang"></span><span class="text-amber-300">"</span>,<br>
+              &nbsp;&nbsp;<span class="text-cyan-300">"role"</span>: <span class="text-amber-300">"</span><span class="text-amber-300" x-data="typingEffect('about_profile_role')" x-text="text"></span><span class="text-amber-300">"</span>,<br>
               &nbsp;&nbsp;<span class="text-cyan-300">"focus"</span>: <span class="text-amber-300">"</span><span class="text-amber-300" x-text="t('about_profile_focus')"></span><span class="text-amber-300">"</span>,<br>
               &nbsp;&nbsp;<span class="text-cyan-300">"bio"</span>: <span class="text-amber-300">"</span><span class="text-amber-300" x-text="t('about_profile_bio')"></span><span class="text-amber-300">"</span><br>
               }<br>
@@ -463,13 +478,13 @@
             <h3 class="text-xl font-mono text-cyan-400 mb-6 flex items-center gap-3"><i class="fa-solid fa-graduation-cap"></i> <span x-text="t('about_edu')"></span></h3>
             <div class="space-y-4">
               <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-800 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,240,255,0.1)] transition-all">
-                <p class="font-medium">Pós-graduação em Inteligência Artificial e Machine Learning</p>
+                <p class="font-medium" x-text="t('edu_postgrad')"></p>
               </div>
               <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-800 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,240,255,0.1)] transition-all">
-                <p class="font-medium">Tecnólogo Superior em Análise e Desenvolvimento de Sistemas</p>
+                <p class="font-medium" x-text="t('edu_tech')"></p>
               </div>
               <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-800 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,240,255,0.1)] transition-all">
-                <p class="font-medium">Bacharel em Engenharia de Software</p>
+                <p class="font-medium" x-text="t('edu_bach')"></p>
               </div>
             </div>
           </div>
