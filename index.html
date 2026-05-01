@@ -54,7 +54,9 @@
                     game_placeholder: 'USUÁRIO_ID',
                     game_hint: '// Use arrow keys to navigate',
                     game_top: 'TOP_10_AGENTS',
-                    game_no_logs: '// Nenhum log encontrado'
+                    game_no_logs: '// Nenhum log encontrado',
+                    loader_cmd: 'cd /portfolio',
+                    loader_entering: 'Entrando...'
                 },
                 en: {
                     nav_home: '~/home',
@@ -93,7 +95,9 @@
                     game_placeholder: 'USER_ID',
                     game_hint: '// Use arrow keys to navigate',
                     game_top: 'TOP_10_AGENTS',
-                    game_no_logs: '// No logs found'
+                    game_no_logs: '// No logs found',
+                    loader_cmd: 'cd /portfolio',
+                    loader_entering: 'Entering...'
                 }
             },
             t(key) {
@@ -106,6 +110,33 @@
             updateMouse(e) {
                 this.mouseX = e.clientX;
                 this.mouseY = e.clientY;
+            }
+        }));
+
+        Alpine.data('terminalLoader', () => ({
+            command: '',
+            fullCommand: '',
+            showSite: false,
+            phase: 'typing',
+            init() {
+                this.fullCommand = this.t('loader_cmd');
+                let i = 0;
+                let interval = setInterval(() => {
+                    if (i >= this.fullCommand.length) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            this.phase = 'entering';
+                            setTimeout(() => {
+                                this.showSite = true;
+                                document.body.style.overflow = 'auto';
+                            }, 800);
+                        }, 500);
+                        return;
+                    }
+                    this.command += this.fullCommand[i];
+                    i++;
+                }, 100);
+                document.body.style.overflow = 'hidden';
             }
         }));
 
@@ -125,7 +156,7 @@
                 const fullText = this.t(this.translationKey);
                 this.interval = setInterval(() => {
                     if (this.index >= fullText.length) {
-                        clearInterval(this.interval);
+                        clearInterval(interval);
                         return;
                     }
                     this.text += fullText[this.index];
@@ -315,6 +346,14 @@
     
     [x-cloak] { display: none !important; }
 
+    .loader-mask {
+        clip-path: circle(150% at center);
+        transition: clip-path 1.2s cubic-bezier(0.85, 0, 0.15, 1);
+    }
+    .loader-mask.hidden {
+        clip-path: circle(0% at center);
+    }
+
     /* Interactive Glow */
     .glow-point {
       width: 400px;
@@ -329,6 +368,25 @@
 <body x-data="portfolio" 
       @mousemove="updateMouse($event)"
       class="bg-slate-950 text-slate-200 bg-grid relative selection:bg-cyan-500/30">
+
+  <!-- Terminal Loader -->
+  <div x-data="terminalLoader" 
+       x-show="!showSite"
+       x-transition:leave="transition ease-in duration-1000"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       :class="showSite ? 'loader-mask hidden' : 'loader-mask'"
+       class="fixed inset-0 z-[100] bg-[#0D1117] flex items-center justify-center font-mono p-6">
+    <div class="max-w-2xl w-full">
+      <div class="flex items-center gap-2 mb-4 text-sm md:text-base">
+        <span class="text-emerald-400">matheus@root</span><span class="text-slate-400">:</span><span class="text-blue-400">~</span><span class="text-slate-300">$</span>
+        <span class="text-cyan-300" x-text="command"></span><span class="animate-pulse text-cyan-400" x-show="phase === 'typing'">_</span>
+      </div>
+      <div x-show="phase === 'entering'" x-cloak class="text-emerald-400 animate-pulse text-sm md:text-base">
+        > <span x-text="t('loader_entering')"></span>
+      </div>
+    </div>
+  </div>
 
   <!-- Floating Mouse Glow -->
   <div class="fixed glow-point z-0" :style="`left: ${mouseX}px; top: ${mouseY}px`" aria-hidden="true"></div>
