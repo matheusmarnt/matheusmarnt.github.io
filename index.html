@@ -450,9 +450,9 @@
               <span class="text-emerald-400">matheus@root</span><span class="text-slate-400">:</span><span class="text-blue-400">~</span>$ cat profile.json<br>
               {<br>
               &nbsp;&nbsp;<span class="text-cyan-300">"name"</span>: <span class="text-amber-300">"Matheus Mariano"</span>,<br>
-              &nbsp;&nbsp;<span class="text-cyan-300">"role"</span>: <span class="text-amber-300">"Engenheiro de Software e Analista e Desenvolvedor de Sistemas"</span>,<br>
-              &nbsp;&nbsp;<span class="text-cyan-300">"focus"</span>: <span class="text-amber-300">"Inovação Pública & Govtech"</span>,<br>
-              &nbsp;&nbsp;<span class="text-cyan-300">"bio"</span>: <span class="text-amber-300">"Engenheiro apaixonado por criar soluções técnicas de alto padrão, com forte atuação em inovação pública, inteligência artificial e tecnologia para governos."</span><br>
+              &nbsp;&nbsp;<span class="text-cyan-300">"role"</span>: <span class="text-amber-300">"</span><span class="text-amber-300" x-data="typingEffect(t('about_profile_role'))" x-text="text" :key="lang"></span><span class="text-amber-300">"</span>,<br>
+              &nbsp;&nbsp;<span class="text-cyan-300">"focus"</span>: <span class="text-amber-300">"</span><span class="text-amber-300" x-text="t('about_profile_focus')"></span><span class="text-amber-300">"</span>,<br>
+              &nbsp;&nbsp;<span class="text-cyan-300">"bio"</span>: <span class="text-amber-300">"</span><span class="text-amber-300" x-text="t('about_profile_bio')"></span><span class="text-amber-300">"</span><br>
               }<br>
               <span class="text-emerald-400">matheus@root</span><span class="text-slate-400">:</span><span class="text-blue-400">~</span>$ <span class="animate-pulse">_</span>
             </div>
