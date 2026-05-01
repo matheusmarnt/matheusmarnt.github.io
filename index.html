@@ -25,20 +25,33 @@
                     nav_contact: '~/contato',
                     status_available: 'Status: Disponível',
                     hero_greeting: 'Olá, sou',
+                    hero_role: 'Engenheiro_de_Software',
                     hero_cta_projects: '[ Executar Projetos ]',
                     hero_cta_contact: 'ping --contato',
                     about_title: 'Sobre_Mim',
+                    about_profile_role: 'Engenheiro de Software e Analista e Desenvolvedor de Sistemas',
+                    about_profile_focus: 'Inovação Pública & Govtech',
+                    about_profile_bio: 'Engenheiro apaixonado por criar soluções técnicas de alto padrão, com forte atuação em inovação pública, inteligência artificial e tecnologia para governos.',
                     about_focus: 'Inovação Pública & Govtech',
                     about_bio: 'Engenheiro apaixonado por criar soluções técnicas de alto padrão, com forte atuação em inovação pública e tecnologia para governos.',
+                    about_edu: 'Formação',
+                    about_exp: 'Experiência',
+                    about_role_gov: 'Servidor Público Efetivo',
+                    about_loc_gov: 'Prefeitura de Gurupi',
+                    about_role_startup: 'Sócio-proprietário',
+                    about_loc_startup: 'Axigov Govtech',
                     stack_title: 'Stack_Técnica',
                     projects_title: 'SELECT * FROM Projetos',
+                    projects_featured: 'Projetos em Destaque',
+                    projects_scoutify_desc: 'Modal de busca global (⌘K) moderno para Laravel usando Livewire v3/v4 e Laravel Scout.',
                     contact_title: 'Contato',
                     contact_msg: '// Init connection request',
                     game_title: 'SNAKE_OS v2.0',
                     game_auth: '[ AUTH & START ]',
                     game_placeholder: 'USUÁRIO_ID',
                     game_hint: '// Use arrow keys to navigate',
-                    game_top: 'TOP_10_AGENTS'
+                    game_top: 'TOP_10_AGENTS',
+                    game_no_logs: '// Nenhum log encontrado'
                 },
                 en: {
                     nav_home: '~/home',
@@ -48,20 +61,33 @@
                     nav_contact: '~/contact',
                     status_available: 'Status: Available',
                     hero_greeting: "Hi, I'm",
+                    hero_role: 'Software_Engineer',
                     hero_cta_projects: '[ Run Projects ]',
                     hero_cta_contact: 'ping --contact',
                     about_title: 'About_Me',
+                    about_profile_role: 'Software Engineer and Systems Analyst and Developer',
+                    about_profile_focus: 'Public Innovation & Govtech',
+                    about_profile_bio: 'Engineer passionate about creating high-standard technical solutions, with strong experience in public innovation, artificial intelligence and technology for governments.',
                     about_focus: 'Public Innovation & Govtech',
                     about_bio: 'Engineer passionate about creating high-standard technical solutions, with strong experience in public innovation and technology for governments.',
+                    about_edu: 'Education',
+                    about_exp: 'Experience',
+                    about_role_gov: 'Permanent Public Servant',
+                    about_loc_gov: 'Gurupi City Hall',
+                    about_role_startup: 'Partner-Owner',
+                    about_loc_startup: 'Axigov Govtech',
                     stack_title: 'Tech_Stack',
                     projects_title: 'SELECT * FROM Projects',
+                    projects_featured: 'Featured Projects',
+                    projects_scoutify_desc: 'Modern global search modal (⌘K) for Laravel using Livewire v3/v4 and Laravel Scout.',
                     contact_title: 'Contact',
                     contact_msg: '// Init connection request',
                     game_title: 'SNAKE_OS v2.0',
                     game_auth: '[ AUTH & START ]',
                     game_placeholder: 'USER_ID',
                     game_hint: '// Use arrow keys to navigate',
-                    game_top: 'TOP_10_AGENTS'
+                    game_top: 'TOP_10_AGENTS',
+                    game_no_logs: '// No logs found'
                 }
             },
             t(key) {
@@ -395,9 +421,7 @@
                         <span class="text-emerald-400 font-bold" x-text="entry.score"></span>
                     </div>
                 </template>
-                <div x-show="leaderboard.length === 0" class="text-center py-10 text-slate-600 text-xs italic">
-                    // No logs found
-                </div>
+                <div x-show="leaderboard.length === 0" class="text-center py-10 text-slate-600 text-xs italic" x-text="t('game_no_logs')"></div>
             </div>
           </div>
         </div>
@@ -436,7 +460,7 @@
 
           <!-- Formação -->
           <div class="group hover:-translate-y-2 transition-transform duration-300">
-            <h3 class="text-xl font-mono text-cyan-400 mb-6 flex items-center gap-3"><i class="fa-solid fa-graduation-cap"></i> Formação</h3>
+            <h3 class="text-xl font-mono text-cyan-400 mb-6 flex items-center gap-3"><i class="fa-solid fa-graduation-cap"></i> <span x-text="t('about_edu')"></span></h3>
             <div class="space-y-4">
               <div class="bg-slate-900/50 p-5 rounded-xl border border-slate-800 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,240,255,0.1)] transition-all">
                 <p class="font-medium">Pós-graduação em Inteligência Artificial e Machine Learning</p>
@@ -452,15 +476,15 @@
 
           <!-- Experiência -->
           <div class="group hover:-translate-y-2 transition-transform duration-300">
-            <h3 class="text-xl font-mono text-emerald-400 mb-6 flex items-center gap-3"><i class="fa-solid fa-briefcase"></i> Experiência</h3>
+            <h3 class="text-xl font-mono text-emerald-400 mb-6 flex items-center gap-3"><i class="fa-solid fa-briefcase"></i> <span x-text="t('about_exp')"></span></h3>
             <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent">
               <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                 <div class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-900 text-emerald-400 group-hover:border-emerald-400 group-hover:shadow-[0_0_10px_rgba(16,185,129,0.5)] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow transition-all z-10">
                   <i class="fa-solid fa-building"></i>
                 </div>
                 <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-xl border border-slate-800 bg-slate-900/50 hover:border-emerald-500/50 transition-all">
-                  <h4 class="font-bold text-lg">Servidor Público Efetivo</h4>
-                  <p class="text-xs text-cyan-400 font-mono mt-1">Prefeitura de Gurupi</p>
+                  <h4 class="font-bold text-lg" x-text="t('about_role_gov')"></h4>
+                  <p class="text-xs text-cyan-400 font-mono mt-1" x-text="t('about_loc_gov')"></p>
                 </div>
               </div>
               <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
@@ -468,8 +492,8 @@
                   <i class="fa-solid fa-rocket"></i>
                 </div>
                 <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-xl border border-slate-800 bg-slate-900/50 hover:border-cyan-500/50 transition-all">
-                  <h4 class="font-bold text-lg">Sócio-proprietário</h4>
-                  <p class="text-xs text-emerald-400 font-mono mt-1">Axigov Govtech</p>
+                  <h4 class="font-bold text-lg" x-text="t('about_role_startup')"></h4>
+                  <p class="text-xs text-emerald-400 font-mono mt-1" x-text="t('about_loc_startup')"></p>
                 </div>
               </div>
             </div>
@@ -533,9 +557,7 @@
                 Open Source
               </div>
               <h3 class="text-2xl font-bold font-mono mb-3 text-white group-hover:text-emerald-300 transition-colors">Scoutify</h3>
-              <p class="text-slate-400 mb-6 text-sm">
-                Modal de busca global (⌘K) moderno para Laravel usando Livewire v3/v4 e Laravel Scout.
-              </p>
+              <p class="text-slate-400 mb-6 text-sm" x-text="t('projects_scoutify_desc')"></p>
               <a href="https://github.com/matheusmarnt/scoutify" target="_blank" class="inline-flex items-center gap-2 text-sm font-mono text-emerald-400 hover:text-emerald-300">
                 [ fork_repo ] <i class="fa-brands fa-github"></i>
               </a>
