@@ -8,6 +8,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+  <link rel="icon" href="data:,">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script>
     document.addEventListener('alpine:init', () => {
@@ -156,7 +157,7 @@
                 const fullText = this.t(this.translationKey);
                 this.interval = setInterval(() => {
                     if (this.index >= fullText.length) {
-                        clearInterval(interval);
+                        clearInterval(this.interval);
                         return;
                     }
                     this.text += fullText[this.index];
