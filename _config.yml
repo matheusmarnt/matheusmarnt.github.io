@@ -1,0 +1,24 @@
+title: Matheus Mariano
+description: Engenheiro de Software | Especialista em IA, Prompt Engineering e Govtech
+url: "https://matheusmarnt.github.io"
+baseurl: ""
+
+author: Matheus Mariano
+email: matheus.marnt@gmail.com
+linkedin: SEU_USUARIO_DO_LINKEDIN
+github: matheusmarnt
+location: Gurupi, Tocantins, Brasil
+
+nav:
+  - name: Início
+    link: /
+  - name: Sobre
+    link: /about.html
+  - name: Projetos
+    link: /projects.html
+  - name: Contato
+    link: /contact.html
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
