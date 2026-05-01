@@ -110,6 +110,131 @@
       </div>
     </section>
 
+    <!-- Interactive Terminal Game -->
+    <section class="py-12 relative z-10">
+      <div class="max-w-4xl mx-auto px-6" x-data="{ 
+        playing: false,
+        score: 0,
+        highScore: 0,
+        canvas: null,
+        ctx: null,
+        box: 20,
+        snake: [],
+        food: null,
+        d: null,
+        gameInterval: null,
+        
+        initGame() {
+          this.canvas = this.$refs.snakeCanvas;
+          this.ctx = this.canvas.getContext('2d');
+          this.reset();
+        },
+        
+        reset() {
+          this.score = 0;
+          this.snake = [{x: 9 * this.box, y: 10 * this.box}];
+          this.food = {
+            x: Math.floor(Math.random() * 19 + 1) * this.box,
+            y: Math.floor(Math.random() * 19 + 1) * this.box
+          };
+          this.d = 'RIGHT';
+          if(this.gameInterval) clearInterval(this.gameInterval);
+        },
+        
+        start() {
+          this.playing = true;
+          this.reset();
+          this.gameInterval = setInterval(() => this.draw(), 100);
+        },
+        
+        direction(event) {
+          let key = event.keyCode;
+          if(key == 37 && this.d != 'RIGHT') this.d = 'LEFT';
+          else if(key == 38 && this.d != 'DOWN') this.d = 'UP';
+          else if(key == 39 && this.d != 'LEFT') this.d = 'RIGHT';
+          else if(key == 40 && this.d != 'UP') this.d = 'DOWN';
+        },
+        
+        collision(head, array) {
+          for(let i = 0; i < array.length; i++) {
+            if(head.x == array[i].x && head.y == array[i].y) return true;
+          }
+          return false;
+        },
+        
+        draw() {
+          this.ctx.fillStyle = '#0f172a';
+          this.ctx.fillRect(0, 0, 400, 400);
+          
+          for(let i = 0; i < this.snake.length; i++) {
+            this.ctx.fillStyle = (i == 0) ? '#00f0ff' : '#06b6d4';
+            this.ctx.fillRect(this.snake[i].x, this.snake[i].y, this.box, this.box);
+            this.ctx.strokeStyle = '#0f172a';
+            this.ctx.strokeRect(this.snake[i].x, this.snake[i].y, this.box, this.box);
+          }
+          
+          this.ctx.fillStyle = '#10b981';
+          this.ctx.fillRect(this.food.x, this.food.y, this.box, this.box);
+          
+          let snakeX = this.snake[0].x;
+          let snakeY = this.snake[0].y;
+          
+          if(this.d == 'LEFT') snakeX -= this.box;
+          if(this.d == 'UP') snakeY -= this.box;
+          if(this.d == 'RIGHT') snakeX += this.box;
+          if(this.d == 'DOWN') snakeY += this.box;
+          
+          if(snakeX == this.food.x && snakeY == this.food.y) {
+            this.score++;
+            this.food = {
+              x: Math.floor(Math.random() * 19 + 1) * this.box,
+              y: Math.floor(Math.random() * 19 + 1) * this.box
+            };
+          } else {
+            this.snake.pop();
+          }
+          
+          let newHead = { x: snakeX, y: snakeY };
+          
+          if(snakeX < 0 || snakeX >= 400 || snakeY < 0 || snakeY >= 400 || this.collision(newHead, this.snake)) {
+            clearInterval(this.gameInterval);
+            this.playing = false;
+            if(this.score > this.highScore) this.highScore = this.score;
+            return;
+          }
+          
+          this.snake.unshift(newHead);
+        }
+      }" x-init="initGame()" @keydown.window="direction($event)">
+        
+        <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden">
+          <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
+            <div class="flex gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <div class="ml-4 text-xs font-mono text-slate-500 underline underline-offset-4 decoration-cyan-500/50">snake_game.exe</div>
+            </div>
+            <div class="font-mono text-xs text-slate-400">
+              Score: <span class="text-cyan-400" x-text="score"></span> | Max: <span class="text-emerald-400" x-text="highScore"></span>
+            </div>
+          </div>
+          
+          <div class="relative flex justify-center bg-slate-950 p-4">
+            <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-800 rounded shadow-inner"></canvas>
+            
+            <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm transition-all duration-500">
+              <p class="text-cyan-400 font-mono text-xl mb-4 animate-bounce">SNAKE_OS READY</p>
+              <button @click="start()" class="px-8 py-3 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+                [ START_SESSION ]
+              </button>
+              <p class="mt-4 text-slate-500 text-xs font-mono">// Use arrow keys to navigate</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- About Section -->
     <section id="sobre" x-intersect:enter="$dispatch('active-section', 'sobre')" class="py-24 relative">
       <div class="max-w-5xl mx-auto px-6" x-data="{ shown: false }" x-intersect.margin.-10%="shown = true">
