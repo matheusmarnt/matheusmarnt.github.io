@@ -114,8 +114,9 @@
     <section class="py-12 relative z-10">
       <div class="max-w-4xl mx-auto px-6" x-data="{ 
         playing: false,
+        playerName: '',
         score: 0,
-        highScore: localStorage.getItem('snake_highscore') || 0,
+        leaderboard: JSON.parse(localStorage.getItem('snake_leaderboard')) || [],
         canvas: null,
         ctx: null,
         box: 20,
@@ -142,6 +143,7 @@
         },
         
         start() {
+          if(!this.playerName.trim()) return alert('Insira seu nome/alias');
           this.playing = true;
           this.reset();
           this.gameInterval = setInterval(() => this.draw(), 100);
@@ -149,7 +151,7 @@
         
         direction(event) {
           let key = event.keyCode;
-          if([37, 38, 39, 40].includes(key)) event.preventDefault(); // Prevent scroll
+          if([37, 38, 39, 40].includes(key) && this.playing) event.preventDefault();
           if(key == 37 && this.d != 'RIGHT') this.d = 'LEFT';
           else if(key == 38 && this.d != 'DOWN') this.d = 'UP';
           else if(key == 39 && this.d != 'LEFT') this.d = 'RIGHT';
@@ -164,8 +166,6 @@
         },
 
         roundRect(x, y, w, h, r) {
-          if (w < 2 * r) r = w / 2;
-          if (h < 2 * r) r = h / 2;
           this.ctx.beginPath();
           this.ctx.moveTo(x + r, y);
           this.ctx.arcTo(x + w, y, x + w, y + h, r);
@@ -180,13 +180,10 @@
           this.ctx.fillStyle = '#050505';
           this.ctx.fillRect(0, 0, 400, 400);
           
-          // Draw Food (rounded)
           this.ctx.fillStyle = '#10b981';
           this.roundRect(this.food.x + 2, this.food.y + 2, this.box - 4, this.box - 4, 8);
           
-          // Draw Snake with tapering and rounding
           for(let i = 0; i < this.snake.length; i++) {
-            // Calculate size for tapering (head is 100%, tail is min 40%)
             let taperFactor = Math.max(0.4, 1 - (i / this.snake.length) * 0.6);
             let size = this.box * taperFactor;
             let offset = (this.box - size) / 2;
@@ -194,12 +191,21 @@
             this.ctx.fillStyle = (i == 0) ? '#00f0ff' : `rgba(6, 182, 212, ${taperFactor})`;
             this.roundRect(this.snake[i].x + offset, this.snake[i].y + offset, size, size, size / 2);
             
-            // Add a little glow to head
             if(i === 0) {
-                this.ctx.shadowBlur = 10;
-                this.ctx.shadowColor = '#00f0ff';
-                this.roundRect(this.snake[i].x + offset, this.snake[i].y + offset, size, size, size / 2);
-                this.ctx.shadowBlur = 0;
+                // Eyes
+                this.ctx.fillStyle = 'white';
+                let eyeSize = 3;
+                if(this.d == 'RIGHT' || this.d == 'LEFT') {
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.snake[i].x + 10, this.snake[i].y + 6, eyeSize, 0, Math.PI*2);
+                    this.ctx.arc(this.snake[i].x + 10, this.snake[i].y + 14, eyeSize, 0, Math.PI*2);
+                    this.ctx.fill();
+                } else {
+                    this.ctx.beginPath();
+                    this.ctx.arc(this.snake[i].x + 6, this.snake[i].y + 10, eyeSize, 0, Math.PI*2);
+                    this.ctx.arc(this.snake[i].x + 14, this.snake[i].y + 10, eyeSize, 0, Math.PI*2);
+                    this.ctx.fill();
+                }
             }
           }
           
@@ -226,39 +232,62 @@
           if(snakeX < 0 || snakeX >= 400 || snakeY < 0 || snakeY >= 400 || this.collision(newHead, this.snake)) {
             clearInterval(this.gameInterval);
             this.playing = false;
-            if(this.score > this.highScore) {
-                this.highScore = this.score;
-                localStorage.setItem('snake_highscore', this.highScore);
-            }
+            this.updateLeaderboard();
             return;
           }
           
           this.snake.unshift(newHead);
+        },
+
+        updateLeaderboard() {
+            this.leaderboard.push({ name: this.playerName, score: this.score });
+            this.leaderboard.sort((a, b) => b.score - a.score);
+            this.leaderboard = this.leaderboard.slice(0, 10);
+            localStorage.setItem('snake_leaderboard', JSON.stringify(this.leaderboard));
         }
       }" x-init="initGame()" @keydown.window="direction($event)">
         
-        <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden">
-          <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex justify-between items-center">
-            <div class="flex gap-2">
-              <div class="w-3 h-3 rounded-full bg-red-500"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500"></div>
-              <div class="ml-4 text-xs font-mono text-slate-500 underline underline-offset-4 decoration-cyan-500/50">snake_game.exe</div>
+        <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden grid md:grid-cols-3">
+          <!-- Game Canvas -->
+          <div class="md:col-span-2 relative bg-slate-950 p-4 flex justify-center items-center border-r border-slate-800">
+            <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-900 rounded"></canvas>
+            
+            <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm px-6 text-center">
+              <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest">SNAKE_OS v2.0</h3>
+              
+              <div class="w-full max-w-xs mb-6">
+                <input type="text" x-model="playerName" placeholder="USUÁRIO_ID" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 transition-all text-center uppercase">
+              </div>
+
+              <button @click="start()" class="w-full max-w-xs px-8 py-4 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] font-bold">
+                [ AUTH & START ]
+              </button>
+              
+              <p class="mt-6 text-slate-500 text-xs font-mono animate-pulse">// Use arrow keys to navigate</p>
             </div>
-            <div class="font-mono text-xs text-slate-400">
-              Score: <span class="text-cyan-400" x-text="score"></span> | Max: <span class="text-emerald-400" x-text="highScore"></span>
+
+            <!-- In-game score overlay -->
+            <div x-show="playing" class="absolute top-8 right-8 font-mono text-xl text-cyan-400/50 pointer-events-none">
+              Score: <span x-text="score"></span>
             </div>
           </div>
-          
-          <div class="relative flex justify-center bg-slate-950 p-4">
-            <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-800 rounded shadow-inner"></canvas>
-            
-            <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm transition-all duration-500">
-              <p class="text-cyan-400 font-mono text-xl mb-4 animate-bounce">SNAKE_OS READY</p>
-              <button @click="start()" class="px-8 py-3 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_15px_rgba(0,240,255,0.3)]">
-                [ START_SESSION ]
-              </button>
-              <p class="mt-4 text-slate-500 text-xs font-mono">// Use arrow keys to navigate</p>
+
+          <!-- Leaderboard -->
+          <div class="bg-slate-900/50 p-6 font-mono">
+            <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
+                <i class="fa-solid fa-trophy text-amber-500"></i>
+                <h4 class="text-sm font-bold text-slate-300">TOP_10_AGENTS</h4>
+            </div>
+            <div class="space-y-3">
+                <template x-for="(entry, index) in leaderboard">
+                    <div class="flex justify-between text-xs border-b border-slate-800/50 pb-2">
+                        <span class="text-slate-500" x-text="`${index + 1}. ${entry.name}`"></span>
+                        <span class="text-emerald-400 font-bold" x-text="entry.score"></span>
+                    </div>
+                </template>
+                <div x-show="leaderboard.length === 0" class="text-center py-10 text-slate-600 text-xs italic">
+                    // No logs found
+                </div>
             </div>
           </div>
         </div>
