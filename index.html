@@ -33,6 +33,8 @@
             lang: localStorage.getItem('pref_lang') || (navigator.language.startsWith('pt') ? 'pt' : 'en'),
             year: new Date().getFullYear(),
             siteReady: false,
+            active: 'inicio',
+            mobileMenuOpen: false,
             translations: {
                 pt: {
                     nav_home: '~/inicio',
@@ -64,13 +66,13 @@
                     projects_title: 'SELECT * FROM Projetos',
                     projects_featured: 'Projetos em Destaque',
                     projects_scoutify_desc: 'Modal de busca global (⌘K) moderno para Laravel usando Livewire v3/v4 e Laravel Scout.',
-                    contact_title: 'Contato',
+                    contact_title: '_Contato',
                     contact_msg: '// Init connection request',
-                    game_title: 'SNAKE_OS v2.0',
-                    game_auth: '[ AUTH & START ]',
+                    game_title: 'SNAKE_OS v1.0',
+                    game_auth: '[ LOGAR & INICIAR ]',
                     game_placeholder: 'USUÁRIO_ID',
-                    game_hint: '// Use arrow keys to navigate',
-                    game_top: 'TOP_10_AGENTS',
+                    game_hint: '// Use as teclas de seta para navegar.',
+                    game_top: 'TOP_10_AGENTES',
                     game_no_logs: '// Nenhum log encontrado',
                     loader_cmd: 'cd /portfolio',
                     loader_entering: 'Entrando...'
@@ -105,9 +107,9 @@
                     projects_title: 'SELECT * FROM Projects',
                     projects_featured: 'Featured Projects',
                     projects_scoutify_desc: 'Modern global search modal (⌘K) for Laravel using Livewire v3/v4 and Laravel Scout.',
-                    contact_title: 'Contact',
+                    contact_title: '_Contact',
                     contact_msg: '// Init connection request',
-                    game_title: 'SNAKE_OS v2.0',
+                    game_title: 'SNAKE_OS v1.0',
                     game_auth: '[ AUTH & START ]',
                     game_placeholder: 'USER_ID',
                     game_hint: '// Use arrow keys to navigate',
@@ -127,6 +129,16 @@
             updateMouse(e) {
                 this.mouseX = e.clientX;
                 this.mouseY = e.clientY;
+            },
+            navigate(dir) {
+                const sections = ['inicio', 'sobre', 'stack', 'projetos', 'contato'];
+                const currentIndex = sections.indexOf(this.active);
+                let nextIndex = dir === 'next' ? currentIndex + 1 : currentIndex - 1;
+                
+                if (nextIndex >= 0 && nextIndex < sections.length) {
+                    const targetId = sections[nextIndex];
+                    document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                }
             }
         }));
 
@@ -395,6 +407,7 @@
 </head>
 <body x-data="portfolio" 
       @mousemove="updateMouse($event)"
+      @active-section.window="active = $event.detail"
       class="bg-slate-950 text-slate-200 bg-grid relative selection:bg-cyan-500/30">
 
   <!-- Terminal Loader -->
@@ -420,11 +433,12 @@
   <div class="fixed glow-point z-0" :style="`left: ${mouseX}px; top: ${mouseY}px`" aria-hidden="true"></div>
 
   <!-- Navbar -->
-  <nav x-data="{ active: 'inicio' }" @active-section.window="active = $event.detail" class="border-b border-cyan-900/30 bg-slate-950/80 backdrop-blur-md fixed w-full z-50 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
+  <nav class="border-b border-cyan-900/30 bg-slate-950/80 backdrop-blur-md fixed w-full z-50 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
     <div class="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-      <a href="#inicio" class="text-2xl font-bold text-white font-mono tracking-tight"><span class="text-cyan-400">&gt;</span> Matheus_Mariano</a>
+      <a href="#inicio" class="text-xl md:text-2xl font-bold text-white font-mono tracking-tight"><span class="text-cyan-400">&gt;</span> Matheus_Mariano</a>
       
-      <div class="flex items-center gap-8">
+      <div class="flex items-center gap-4 md:gap-8">
+        <!-- Desktop Nav -->
         <div class="hidden md:flex gap-8 text-sm font-medium font-mono">
           <a href="#inicio" @click="active = 'inicio'" :class="active === 'inicio' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'" x-text="t('nav_home')"></a>
           <a href="#sobre" @click="active = 'sobre'" :class="active === 'sobre' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]' : 'hover:text-cyan-400 transition'" x-text="t('nav_about')"></a>
@@ -438,13 +452,37 @@
           <button @click="setLang('pt')" :class="lang === 'pt' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-500'" class="px-2 py-1 rounded transition-all">PT</button>
           <button @click="setLang('en')" :class="lang === 'en' ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-500'" class="px-2 py-1 rounded transition-all">EN</button>
         </div>
+
+        <!-- Mobile Toggle Button -->
+        <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-slate-300 hover:text-cyan-400 transition-colors">
+          <i class="fa-solid text-2xl" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars-staggered'"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div x-show="mobileMenuOpen" 
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         class="md:hidden bg-slate-950/95 border-b border-cyan-900/30 backdrop-blur-xl absolute w-full left-0 z-40">
+      <div class="flex flex-col p-6 gap-4 text-center font-mono text-lg">
+        <a href="#inicio" @click="active = 'inicio'; mobileMenuOpen = false" :class="active === 'inicio' ? 'text-cyan-400' : 'text-slate-400'" x-text="t('nav_home')"></a>
+        <a href="#sobre" @click="active = 'sobre'; mobileMenuOpen = false" :class="active === 'sobre' ? 'text-cyan-400' : 'text-slate-400'" x-text="t('nav_about')"></a>
+        <a href="#stack" @click="active = 'stack'; mobileMenuOpen = false" :class="active === 'stack' ? 'text-cyan-400' : 'text-slate-400'" x-text="t('nav_stack')"></a>
+        <a href="#projetos" @click="active = 'projetos'; mobileMenuOpen = false" :class="active === 'projetos' ? 'text-cyan-400' : 'text-slate-400'" x-text="t('nav_projects')"></a>
+        <a href="#contato" @click="active = 'contato'; mobileMenuOpen = false" :class="active === 'contato' ? 'text-cyan-400' : 'text-slate-400'" x-text="t('nav_contact')"></a>
       </div>
     </div>
   </nav>
 
   <main>
     <!-- Hero Section -->
-    <section id="inicio" x-intersect:enter="$dispatch('active-section', 'inicio')" class="min-h-screen flex items-center pt-20 relative overflow-hidden">
+    <section id="inicio" x-intersect.margin.-40%="$dispatch('active-section', 'inicio')" class="min-h-screen flex items-center pt-20 relative overflow-hidden">
       <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-[120px] -z-10"></div>
       <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center" 
            x-data="{ shown: false }" x-intersect="shown = true">
@@ -453,19 +491,19 @@
           <div class="inline-block px-4 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-mono mb-6 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
             <i class="fa-solid fa-circle-dot animate-pulse mr-2"></i> <span x-text="t('status_available')"></span>
           </div>
-          <h1 class="text-6xl font-bold leading-tight mb-4">
+          <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
             <span x-text="t('hero_greeting')"></span> <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)]">Matheus Mariano</span>
           </h1>
           <div x-data="typingEffect('hero_role')">
-            <p class="text-2xl text-slate-400 mb-8 font-mono border-l-2 border-cyan-500 pl-4">
+            <p class="text-xl md:text-2xl text-slate-400 mb-8 font-mono border-l-2 border-cyan-500 pl-4">
               > <span x-text="text"></span><span class="animate-pulse text-cyan-400">_</span>
             </p>
           </div>
           
           <div class="flex flex-wrap gap-4 font-mono">
-            <a href="#projetos" class="bg-cyan-500/10 border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] px-8 py-3 rounded-lg font-semibold transition-all duration-300" x-text="t('hero_cta_projects')">
+            <a href="#projetos" class="w-full md:w-auto text-center bg-cyan-500/10 border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-slate-950 hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] px-8 py-3 rounded-lg font-semibold transition-all duration-300" x-text="t('hero_cta_projects')">
             </a>
-            <a href="#contato" class="border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 px-8 py-3 rounded-lg font-semibold transition-all duration-300" x-text="t('hero_cta_contact')">
+            <a href="#contato" class="w-full md:w-auto text-center border border-slate-700 hover:border-emerald-400 hover:text-emerald-400 px-8 py-3 rounded-lg font-semibold transition-all duration-300" x-text="t('hero_cta_contact')">
             </a>
           </div>
         </div>
@@ -481,59 +519,11 @@
       </div>
     </section>
 
-    <!-- Interactive Terminal Game -->
-    <section class="py-12 relative z-10">
-      <div class="max-w-4xl mx-auto px-6" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
-        
-        <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden grid md:grid-cols-3">
-          <!-- Game Canvas -->
-          <div class="md:col-span-2 relative bg-slate-950 p-4 flex justify-center items-center border-r border-slate-800">
-            <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-900 rounded"></canvas>
-            
-            <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm px-6 text-center">
-              <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest" x-text="t('game_title')"></h3>
-              
-              <div class="w-full max-w-xs mb-6">
-                <input type="text" x-model="playerName" :placeholder="t('game_placeholder')" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 transition-all text-center uppercase">
-              </div>
-
-              <button @click="start()" class="w-full max-w-xs px-8 py-4 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] font-bold" x-text="t('game_auth')">
-              </button>
-              
-              <p class="mt-6 text-slate-500 text-xs font-mono animate-pulse" x-text="t('game_hint')"></p>
-            </div>
-
-            <!-- In-game score overlay -->
-            <div x-show="playing" class="absolute top-8 right-8 font-mono text-xl text-cyan-400/50 pointer-events-none">
-              Score: <span x-text="score"></span>
-            </div>
-          </div>
-
-          <!-- Leaderboard -->
-          <div class="bg-slate-900/50 p-6 font-mono">
-            <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
-                <i class="fa-solid fa-trophy text-amber-500"></i>
-                <h4 class="text-sm font-bold text-slate-300" x-text="t('game_top')"></h4>
-            </div>
-            <div class="space-y-3">
-                <template x-for="(entry, index) in leaderboard">
-                    <div class="flex justify-between text-xs border-b border-slate-800/50 pb-2">
-                        <span class="text-slate-500" x-text="`${index + 1}. ${entry.name}`"></span>
-                        <span class="text-emerald-400 font-bold" x-text="entry.score"></span>
-                    </div>
-                </template>
-                <div x-show="leaderboard.length === 0" class="text-center py-10 text-slate-600 text-xs italic" x-text="t('game_no_logs')"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- About Section -->
-    <section id="sobre" x-intersect:enter="$dispatch('active-section', 'sobre')" class="py-24 relative">
+    <section id="sobre" x-intersect.margin.-40%="$dispatch('active-section', 'sobre')" class="py-24 relative">
       <div class="max-w-5xl mx-auto px-6" x-data="{ shown: false }" x-intersect.margin.-10%="shown = true">
         <div class="flex items-center gap-4 mb-12">
-          <h2 class="text-4xl font-bold font-mono text-white"><span class="text-emerald-400">#</span> <span x-text="t('about_title')"></span></h2>
+          <h2 class="text-4xl font-bold font-mono text-white"><span class="text-emerald-400">#</span> <span x-html="t('about_title').replace('Mim', '<span class=\'text-emerald-400\'>Mim</span>').replace('Me', '<span class=\'text-emerald-400\'>Me</span>')"></span></h2>
           <div class="h-px bg-slate-800 flex-grow"></div>
         </div>
 
@@ -592,7 +582,7 @@
                 <div class="flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-900 text-cyan-400 group-hover:border-cyan-400 group-hover:shadow-[0_0_10px_rgba(0,240,255,0.5)] shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow transition-all z-10">
                   <i class="fa-solid fa-rocket"></i>
                 </div>
-                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-xl border border-slate-800 bg-slate-900/50 hover:border-cyan-500/50 transition-all">
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-xl border border-slate-800 bg-slate-900/50 hover:border-emerald-500/50 transition-all">
                   <h4 class="font-bold text-lg" x-text="t('about_role_startup')"></h4>
                   <p class="text-xs text-emerald-400 font-mono mt-1" x-text="t('about_loc_startup')"></p>
                 </div>
@@ -604,30 +594,42 @@
     </section>
 
     <!-- Stack Section -->
-    <section id="stack" x-intersect:enter="$dispatch('active-section', 'stack')" class="py-24 bg-slate-950/50 border-y border-slate-900 relative">
+    <section id="stack" x-intersect.margin.-40%="$dispatch('active-section', 'stack')" class="py-24 bg-slate-950/50 border-y border-slate-900 relative">
       <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/10 via-transparent to-transparent"></div>
       <div class="max-w-6xl mx-auto px-6 relative" x-data="{ shown: false }" x-intersect.margin.-10%="shown = true">
         <div class="flex items-center justify-end gap-4 mb-16">
           <div class="h-px bg-slate-800 flex-grow"></div>
-          <h2 class="text-4xl font-bold font-mono text-white" x-html="`${t('stack_title')}()`"></h2>
+          <h2 class="text-4xl font-bold font-mono text-white" x-html="t('stack_title').replace('Técnica', '<span class=\'text-emerald-400\'>Técnica</span>').replace('Stack', (m) => t('stack_title').includes('Tech') ? `<span class='text-emerald-400'>${m}</span>` : m)"></h2>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-200" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
           <template x-for="tech in [
-            { name: 'Laravel', icon: 'devicon-laravel-original' },
-            { name: 'Filament', icon: 'fa-solid fa-bolt-lightning' },
-            { name: 'Livewire', icon: 'devicon-livewire-plain' },
-            { name: 'Alpine.js', icon: 'devicon-alpinejs-plain' },
-            { name: 'Tailwind', icon: 'devicon-tailwindcss-original' },
-            { name: 'Flutter', icon: 'devicon-flutter-plain' },
-            { name: 'Prompt Eng.', icon: 'fa-solid fa-microchip' },
-            { name: 'Arquitetura', icon: 'fa-solid fa-sitemap' }
+            { name: 'Laravel', icon: 'devicon-laravel-original', color: '#FF2D20' },
+            { name: 'Filament', isSvg: true, path: 'assets/img/filament.svg', color: '#FFA500' },
+            { name: 'Livewire', icon: 'devicon-livewire-plain', color: '#FB70A9' },
+            { name: 'Alpine.js', icon: 'devicon-alpinejs-plain', color: '#8BC0D0' },
+            { name: 'Tailwind', icon: 'devicon-tailwindcss-original', color: '#06B6D4' },
+            { name: 'Flutter', icon: 'devicon-flutter-plain', color: '#02569B' },
+            { name: 'Prompt Eng.', icon: 'fa-solid fa-microchip', color: '#10B981' },
+            { name: 'Arquitetura', icon: 'fa-solid fa-sitemap', color: '#9E0BF5' }
           ]">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl text-center hover:-translate-y-2 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all duration-300 group cursor-default">
-              <div class="mb-4 flex justify-center">
-                <i :class="tech.icon + ' text-4xl text-slate-500 group-hover:text-cyan-400 transition-colors duration-300'"></i>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl text-center hover:-translate-y-2 transition-all duration-300 group cursor-default"
+                 x-data="{ active: false }"
+                 @mouseenter="active = true"
+                 @mouseleave="active = false"
+                 :style="active ? `border-color: ${tech.color}; box-shadow: 0 0 20px ${tech.color}33` : ''">
+              <div class="mb-4 flex justify-center items-center h-12">
+                <template x-if="tech.isSvg">
+                  <div class="h-10 w-10 transition-all duration-300"
+                       :style="`background-color: ${active ? tech.color : '#64748b'}; -webkit-mask: url(${tech.path}) no-repeat center / contain; mask: url(${tech.path}) no-repeat center / contain; ${active ? `filter: drop-shadow(0 0 8px ${tech.color}88)` : ''}`">
+                  </div>
+                </template>
+                <template x-if="!tech.isSvg">
+                  <i :class="tech.icon" class="text-4xl text-slate-500 transition-colors duration-300"
+                     :style="active ? `color: ${tech.color}` : ''"></i>
+                </template>
               </div>
-              <p class="font-mono text-xs text-slate-400 group-hover:text-cyan-300 transition-colors" x-text="tech.name"></p>
+              <p class="font-mono text-xs text-slate-400 transition-colors group-hover:text-white" x-text="tech.name"></p>
             </div>
           </template>
         </div>
@@ -635,10 +637,10 @@
     </section>
 
     <!-- Projects Section -->
-    <section id="projetos" x-intersect:enter="$dispatch('active-section', 'projetos')" class="py-24 relative">
+    <section id="projetos" x-intersect.margin.-40%="$dispatch('active-section', 'projetos')" class="py-24 relative">
       <div class="max-w-6xl mx-auto px-6" x-data="{ shown: false }" x-intersect.margin.-10%="shown = true">
         <div class="flex items-center gap-4 mb-16">
-          <h2 class="text-4xl font-bold font-mono text-white" x-text="t('projects_title')"></h2>
+          <h2 class="text-4xl font-bold font-mono text-white" x-html="t('projects_title').replace('Projetos', '<span class=\'text-emerald-400\'>Projetos</span>').replace('Projects', '<span class=\'text-emerald-400\'>Projects</span>')"></h2>
           <div class="h-px bg-slate-800 flex-grow"></div>
         </div>
 
@@ -669,11 +671,10 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contato" x-intersect:enter="$dispatch('active-section', 'contato')" class="py-24 bg-slate-950/80 border-t border-slate-900 relative overflow-hidden">
+    <section id="contato" x-intersect.margin.-40%="$dispatch('active-section', 'contato')" class="py-24 bg-slate-950/80 border-t border-slate-900 relative overflow-hidden">
       <div class="absolute bottom-0 right-0 w-96 h-96 bg-cyan-600/10 rounded-full blur-[100px] -z-10"></div>
       <div class="max-w-3xl mx-auto px-6 text-center" x-data="{ shown: false }" x-intersect="shown = true">
-        <h2 class="text-5xl font-bold font-mono text-white mb-6" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-y-8">
-          <span class="animate-pulse text-cyan-500">_</span><span x-text="t('contact_title')"></span>
+        <h2 class="text-5xl font-bold font-mono text-white mb-6" x-show="shown" x-transition:enter="transition ease-out duration-700" x-transition:enter-start="opacity-0 -translate-y-8" x-html="t('contact_title').replace('_', '<span class=\'text-cyan-400\'>_</span>').replace('Contato', '<span class=\'text-emerald-400\'>Contato</span>').replace('Contact', '<span class=\'text-emerald-400\'>Contact</span>')">
         </h2>
         <p class="text-slate-400 mb-12 font-mono text-sm" x-show="shown" x-transition:enter="transition ease-out duration-700 delay-100" x-transition:enter-start="opacity-0" x-text="t('contact_msg')">
         </p>
@@ -694,7 +695,98 @@
         </div>
       </div>
     </section>
+
+    <!-- Interactive Terminal Game -->
+    <section class="py-12 relative z-10 w-full flex justify-center">
+      <div class="w-full max-w-4xl px-4 sm:px-6" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
+        
+        <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden grid md:grid-cols-3">
+          <!-- Game Canvas -->
+          <div class="md:col-span-2 relative bg-slate-950 p-2 sm:p-4 flex justify-center items-center border-b md:border-b-0 md:border-r border-slate-800 overflow-hidden">
+            <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-900 rounded max-w-full h-auto aspect-square"></canvas>
+            
+            <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm px-6 text-center">
+              <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest" x-text="t('game_title')"></h3>
+              
+              <div class="w-full max-w-xs mb-6">
+                <input type="text" x-model="playerName" :placeholder="t('game_placeholder')" 
+                       @keydown.enter="start()"
+                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 transition-all text-center uppercase">
+              </div>
+
+              <button @click="start()" class="w-full max-w-xs px-8 py-4 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] font-bold" x-text="t('game_auth')">
+              </button>
+              
+              <p class="mt-6 text-slate-500 text-xs font-mono animate-pulse" x-text="t('game_hint')"></p>
+            </div>
+
+            <!-- In-game score overlay -->
+            <div x-show="playing" class="absolute top-8 right-8 font-mono text-xl text-cyan-400/50 pointer-events-none">
+              Score: <span x-text="score"></span>
+            </div>
+          </div>
+
+          <!-- Leaderboard -->
+          <div class="bg-slate-900/50 p-6 font-mono">
+            <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
+                <i class="fa-solid fa-trophy text-amber-500"></i>
+                <h4 class="text-sm font-bold text-slate-300" x-text="t('game_top')"></h4>
+            </div>
+            <div class="space-y-3">
+                <template x-for="(entry, index) in leaderboard">
+                    <div class="flex justify-between text-xs border-b border-slate-800/50 pb-2">
+                        <span class="text-slate-500" x-text="`${index + 1}. ${entry.name}`"></span>
+                        <span class="text-emerald-400 font-bold" x-text="entry.score"></span>
+                    </div>
+                </template>
+                <div x-show="leaderboard.length === 0" class="text-center py-10 text-slate-600 text-xs italic" x-text="t('game_no_logs')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <!-- Unified Section Navigator -->
+  <div x-show="siteReady"
+       x-cloak
+       x-transition:enter="transition ease-out duration-500"
+       x-transition:enter-start="opacity-0 translate-y-12"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       class="fixed z-[45] bottom-6 md:bottom-8 flex flex-col items-center bg-slate-900/40 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-700 ease-in-out"
+       :style="active === 'inicio' 
+                ? 'left: 50%; transform: translateX(-50%);' 
+                : (window.innerWidth < 768 
+                    ? 'left: calc(100% - 4.5rem); transform: translateX(0);' 
+                    : 'left: calc(100% - 6rem); transform: translateX(0);')">
+    
+    <!-- Previous -->
+    <button x-show="active !== 'inicio'"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-50"
+            x-transition:enter-end="opacity-100 scale-100"
+            @click="navigate('prev')"
+            class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all active:scale-90 group">
+      <i class="fa-solid fa-chevron-up text-sm md:text-base group-hover:-translate-y-0.5 transition-transform"></i>
+    </button>
+
+    <!-- Divider -->
+    <div x-show="active !== 'inicio' && active !== 'contato'" class="w-6 h-px bg-white/5 my-1"></div>
+
+    <!-- Next -->
+    <button x-show="active !== 'contato'"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-50"
+            x-transition:enter-end="opacity-100 scale-100"
+            @click="navigate('next')"
+            class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-90 group">
+      <div class="flex flex-col items-center gap-0.5" x-show="active === 'inicio'">
+        <span class="text-[10px] font-mono uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">Start</span>
+        <i class="fa-solid fa-chevron-down text-sm md:text-base animate-bounce"></i>
+      </div>
+      <i x-show="active !== 'inicio'" class="fa-solid fa-chevron-down text-sm md:text-base group-hover:translate-y-0.5 transition-transform"></i>
+    </button>
+  </div>
 
   <footer class="bg-slate-950 border-t border-cyan-900/30 py-8 text-center text-sm text-slate-500 font-mono">
     <p>System.exit(0) // © <span x-text="year"></span> Matheus Mariano • Gurupi, TO</p>
