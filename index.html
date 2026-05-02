@@ -77,7 +77,8 @@
                     game_top: 'TOP_10_AGENTES',
                     game_no_logs: '// Nenhum log encontrado',
                     loader_cmd: 'cd /portfolio',
-                    loader_entering: 'Entrando...'
+                    loader_entering: 'Entrando...',
+                    nav_game: 'Snake_OS'
                 },
                 en: {
                     nav_home: '~/home',
@@ -120,7 +121,8 @@
                     game_top: 'TOP_10_AGENTS',
                     game_no_logs: '// No logs found',
                     loader_cmd: 'cd /portfolio',
-                    loader_entering: 'Entering...'
+                    loader_entering: 'Entering...',
+                    nav_game: 'Snake_OS'
                 }
             },
             t(key) {
@@ -135,15 +137,16 @@
                 this.mouseY = e.clientY;
             },
             navigate(dir) {
-                const sections = ['inicio', 'sobre', 'stack', 'projetos', 'contato'];
+                const sections = ['inicio', 'sobre', 'stack', 'projetos', 'contato', 'game'];
                 const currentIndex = sections.indexOf(this.active);
                 let nextIndex = dir === 'next' ? currentIndex + 1 : currentIndex - 1;
-                
+
                 if (nextIndex >= 0 && nextIndex < sections.length) {
                     const targetId = sections[nextIndex];
                     document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
                 }
             }
+
         }));
 
         Alpine.data('terminalLoader', () => ({
@@ -265,6 +268,8 @@
             d: null,
             gameInterval: null,
             speed: 120,
+            particles: [],
+            mouthOpen: 0,
 
             initGame() {
                 this.canvas = this.$refs.snakeCanvas;
@@ -276,11 +281,15 @@
                 this.score = 0;
                 this.speed = 120;
                 this.snake = [{ x: 9 * this.box, y: 10 * this.box }];
+                const maxX = Math.floor(this.canvas.width / this.box) - 1;
+                const maxY = Math.floor(this.canvas.height / this.box) - 1;
                 this.food = {
-                    x: Math.floor(Math.random() * 19 + 1) * this.box,
-                    y: Math.floor(Math.random() * 19 + 1) * this.box
+                    x: Math.floor(Math.random() * maxX + 1) * this.box,
+                    y: Math.floor(Math.random() * maxY + 1) * this.box
                 };
                 this.d = 'RIGHT';
+                this.particles = [];
+                this.mouthOpen = 0;
                 if (this.gameInterval) clearTimeout(this.gameInterval);
             },
 
@@ -324,36 +333,95 @@
                 this.ctx.fill();
             },
 
+            createExplosion(x, y) {
+                const color = '#10b981'; // Food color
+                for (let i = 0; i < 12; i++) {
+                    this.particles.push({
+                        x: x + this.box / 2,
+                        y: y + this.box / 2,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.5) * 10,
+                        life: 1.0,
+                        size: Math.random() * 3 + 2
+                    });
+                }
+            },
+
+            updateParticles() {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.05;
+                    if (p.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+            },
+
             draw() {
+                const head = this.snake[0];
+                if (head && this.food) {
+                    const dx = head.x - this.food.x;
+                    const dy = head.y - this.food.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const targetMouth = dist < this.box * 3 ? Math.max(0, 1 - dist / (this.box * 3)) : 0;
+                    this.mouthOpen = this.mouthOpen * 0.7 + targetMouth * 0.3; // Smoothing
+                }
+
                 this.ctx.fillStyle = '#050505';
-                this.ctx.fillRect(0, 0, 400, 400);
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
                 this.ctx.fillStyle = '#10b981';
                 this.roundRect(this.food.x + 2, this.food.y + 2, this.box - 4, this.box - 4, 8);
 
                 for (let i = 0; i < this.snake.length; i++) {
+                    if (i === 0) {
+                        this.ctx.fillStyle = '#00f0ff';
+                        const centerX = this.snake[i].x + this.box / 2;
+                        const centerY = this.snake[i].y + this.box / 2;
+                        const radius = this.box / 2;
+                        
+                        let rotation = 0;
+                        if (this.d === 'RIGHT') rotation = 0;
+                        if (this.d === 'DOWN') rotation = Math.PI / 2;
+                        if (this.d === 'LEFT') rotation = Math.PI;
+                        if (this.d === 'UP') rotation = 3 * Math.PI / 2;
+
+                        const opening = this.mouthOpen * 0.25 * Math.PI;
+
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(centerX, centerY);
+                        this.ctx.arc(centerX, centerY, radius, rotation + opening, rotation + 2 * Math.PI - opening);
+                        this.ctx.closePath();
+                        this.ctx.fill();
+
+                        // Eyes
+                        this.ctx.fillStyle = 'black';
+                        let eyeSize = 2;
+                        let eyeX, eyeY;
+                        if (this.d == 'RIGHT' || this.d == 'LEFT') {
+                            eyeX = this.d == 'RIGHT' ? centerX + 2 : centerX - 2;
+                            this.ctx.beginPath();
+                            this.ctx.arc(eyeX, centerY - 5, eyeSize, 0, Math.PI * 2);
+                            this.ctx.arc(eyeX, centerY + 5, eyeSize, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        } else {
+                            eyeY = this.d == 'DOWN' ? centerY + 2 : centerY - 2;
+                            this.ctx.beginPath();
+                            this.ctx.arc(centerX - 5, eyeY, eyeSize, 0, Math.PI * 2);
+                            this.ctx.arc(centerX + 5, eyeY, eyeSize, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                        continue; // Skip standard roundRect for head
+                    }
+
                     let taperFactor = Math.max(0.4, 1 - (i / this.snake.length) * 0.6);
                     let size = this.box * taperFactor;
                     let offset = (this.box - size) / 2;
 
-                    this.ctx.fillStyle = (i == 0) ? '#00f0ff' : `rgba(6, 182, 212, ${taperFactor})`;
+                    this.ctx.fillStyle = `rgba(6, 182, 212, ${taperFactor})`;
                     this.roundRect(this.snake[i].x + offset, this.snake[i].y + offset, size, size, size / 2);
-
-                    if (i === 0) {
-                        this.ctx.fillStyle = 'black';
-                        let eyeSize = 3;
-                        if (this.d == 'RIGHT' || this.d == 'LEFT') {
-                            this.ctx.beginPath();
-                            this.ctx.arc(this.snake[i].x + 10, this.snake[i].y + 6, eyeSize, 0, Math.PI * 2);
-                            this.ctx.arc(this.snake[i].x + 10, this.snake[i].y + 14, eyeSize, 0, Math.PI * 2);
-                            this.ctx.fill();
-                        } else {
-                            this.ctx.beginPath();
-                            this.ctx.arc(this.snake[i].x + 6, this.snake[i].y + 10, eyeSize, 0, Math.PI * 2);
-                            this.ctx.arc(this.snake[i].x + 14, this.snake[i].y + 10, eyeSize, 0, Math.PI * 2);
-                            this.ctx.fill();
-                        }
-                    }
                 }
 
                 let snakeX = this.snake[0].x;
@@ -365,6 +433,7 @@
                 if (this.d == 'DOWN') snakeY += this.box;
 
                 if (snakeX == this.food.x && snakeY == this.food.y) {
+                    this.createExplosion(this.food.x, this.food.y);
                     this.score++;
                     if (this.score % 10 === 0) {
                         this.speed = Math.max(40, this.speed * 0.9);
@@ -374,9 +443,11 @@
                         this.updateLeaderboard();
                         return;
                     }
+                    const maxX = Math.floor(this.canvas.width / this.box) - 1;
+                    const maxY = Math.floor(this.canvas.height / this.box) - 1;
                     this.food = {
-                        x: Math.floor(Math.random() * 19 + 1) * this.box,
-                        y: Math.floor(Math.random() * 19 + 1) * this.box
+                        x: Math.floor(Math.random() * maxX + 1) * this.box,
+                        y: Math.floor(Math.random() * maxY + 1) * this.box
                     };
                 } else {
                     this.snake.pop();
@@ -384,13 +455,21 @@
 
                 let newHead = { x: snakeX, y: snakeY };
 
-                if (snakeX < 0 || snakeX >= 400 || snakeY < 0 || snakeY >= 400 || this.collision(newHead, this.snake)) {
+                if (snakeX < 0 || snakeX >= this.canvas.width || snakeY < 0 || snakeY >= this.canvas.height || this.collision(newHead, this.snake)) {
                     this.playing = false;
                     this.updateLeaderboard();
                     return;
                 }
 
                 this.snake.unshift(newHead);
+
+                this.updateParticles();
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = `rgba(16, 185, 129, ${p.life})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
             },
 
             updateLeaderboard() {
@@ -728,49 +807,62 @@
     </section>
 
     <!-- Interactive Terminal Game -->
-    <section class="py-12 relative z-10 w-full flex justify-center">
-      <div class="w-full max-w-4xl px-4 sm:px-6" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
+    <section id="game" x-intersect.margin.-40%="$dispatch('active-section', 'game')" class="py-24 relative overflow-hidden flex justify-center">
+      <div class="max-w-6xl mx-auto px-6 w-full" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
         
-        <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden grid md:grid-cols-3">
-          <!-- Game Canvas -->
-          <div class="md:col-span-2 relative bg-slate-950 p-2 sm:p-4 flex justify-center items-center border-b md:border-b-0 md:border-r border-slate-800 overflow-hidden">
-            <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-900 rounded max-w-full h-auto aspect-square"></canvas>
-            
-            <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm px-6 text-center">
-              <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest" x-text="t('game_title')"></h3>
-              
-              <div class="w-full max-w-xs mb-6">
-                <input type="text" x-model="playerName" :placeholder="t('game_placeholder')" 
-                       @keydown.enter="start()"
-                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 transition-all text-center uppercase">
-              </div>
+        <div class="flex items-center gap-4 mb-16">
+          <h2 class="text-4xl font-bold font-mono text-white"><span class="text-cyan-400">#</span> <span x-text="t('nav_game')"></span></h2>
+          <div class="h-px bg-slate-800 flex-grow"></div>
+        </div>
 
-              <button @click="start()" class="w-full max-w-xs px-8 py-4 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] font-bold" x-text="t('game_auth')">
-              </button>
-              
-              <p class="mt-6 text-slate-500 text-xs font-mono animate-pulse" x-text="t('game_hint')"></p>
+        <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden">
+          <!-- Terminal Header with Score -->
+          <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center font-mono text-xs">
+            <div class="flex gap-1.5">
+              <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
             </div>
-
-            <!-- In-game score overlay -->
-            <div x-show="playing" class="absolute top-8 right-8 font-mono text-xl text-cyan-400/50 pointer-events-none">
-              Score: <span x-text="score"></span>
-            </div>
+            <div class="text-slate-500 uppercase tracking-widest">SNAKE_OS_STATS</div>
+            <div class="text-cyan-400 font-bold">SCORE: <span x-text="score"></span></div>
           </div>
 
-          <!-- Leaderboard -->
-          <div class="bg-slate-900/50 p-6 font-mono">
-            <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
-                <i class="fa-solid fa-trophy text-amber-500"></i>
-                <h4 class="text-sm font-bold text-slate-300" x-text="t('game_top')"></h4>
+          <div class="grid md:grid-cols-3">
+            <!-- Game Canvas -->
+            <div class="md:col-span-2 relative bg-slate-950 p-2 sm:p-4 flex justify-center items-center border-b md:border-b-0 md:border-r border-slate-800 overflow-hidden">
+              <canvas x-ref="snakeCanvas" width="600" height="600" class="border border-slate-900 rounded max-w-full h-auto aspect-square"></canvas>
+              
+              <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm px-6 text-center">
+                <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest" x-text="t('game_title')"></h3>
+                
+                <div class="w-full max-w-xs mb-6">
+                  <input type="text" x-model="playerName" :placeholder="t('game_placeholder')" 
+                         @keydown.enter="start()"
+                         class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-cyan-300 focus:outline-none focus:border-cyan-500 transition-all text-center uppercase">
+                </div>
+
+                <button @click="start()" class="w-full max-w-xs px-8 py-4 bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-mono hover:bg-cyan-500 hover:text-slate-950 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)] font-bold" x-text="t('game_auth')">
+                </button>
+                
+                <p class="mt-6 text-slate-500 text-xs font-mono animate-pulse" x-text="t('game_hint')"></p>
+              </div>
             </div>
-            <div class="space-y-3">
-                <template x-for="(entry, index) in leaderboard">
-                    <div class="flex justify-between text-xs border-b border-slate-800/50 pb-2">
-                        <span class="text-slate-500" x-text="`${index + 1}. ${entry.name}`"></span>
-                        <span class="text-emerald-400 font-bold" x-text="entry.score"></span>
-                    </div>
-                </template>
-                <div x-show="leaderboard.length === 0" class="text-center py-10 text-slate-600 text-xs italic" x-text="t('game_no_logs')"></div>
+
+            <!-- Leaderboard -->
+            <div class="bg-slate-900/50 p-6 font-mono">
+              <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
+                  <i class="fa-solid fa-trophy text-amber-500"></i>
+                  <h4 class="text-sm font-bold text-slate-300" x-text="t('game_top')"></h4>
+              </div>
+              <div class="space-y-3">
+                  <template x-for="(entry, index) in leaderboard">
+                      <div class="flex justify-between text-xs border-b border-slate-800/50 pb-2">
+                          <span class="text-slate-500" x-text="`${index + 1}. ${entry.name}`"></span>
+                          <span class="text-emerald-400 font-bold" x-text="entry.score"></span>
+                      </div>
+                  </template>
+                  <div x-show="leaderboard.length === 0" class="text-center py-10 text-slate-600 text-xs italic" x-text="t('game_no_logs')"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -802,10 +894,10 @@
     </button>
 
     <!-- Divider -->
-    <div x-show="active !== 'inicio' && active !== 'contato'" class="w-6 h-px bg-white/5 my-1"></div>
+    <div x-show="active !== 'inicio' && active !== 'game'" class="w-6 h-px bg-white/5 my-1"></div>
 
     <!-- Next -->
-    <button x-show="active !== 'contato'"
+    <button x-show="active !== 'game'"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-50"
             x-transition:enter-end="opacity-100 scale-100"
