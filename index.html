@@ -45,12 +45,14 @@
                     status_available: 'Status: Disponível',
                     hero_greeting: 'Olá, sou',
                     hero_role: 'Engenheiro_de_Software',
+                    hero_role_ia: 'Especialista_em_IA',
                     hero_cta_projects: '[ Executar Projetos ]',
                     hero_cta_contact: 'ping --contato',
+                    home_title: 'Iniciar',
                     about_title: 'Sobre_Mim',
                     about_profile_role: 'Engenheiro de Software e Analista e Desenvolvedor de Sistemas',
                     about_profile_focus: 'Inovação Pública & Govtech',
-                    about_profile_bio: 'Engenheiro apaixonado por criar soluções técnicas de alto padrão, com forte atuação em inovação pública, inteligência artificial e tecnologia para governos.',
+                    about_profile_bio: '7+ anos experiência como desenvolvedor full stack. Especialista em IA, ecossistema Laravel (Filament/Livewire) e Flutter. Foco em inovação tecnológica pública: Servidor efetivo (Ciência, Tecnologia e Inovação - Prefeitura de Gurupi) & Founder da startup govtech Axigov. Código limpo, arquitetura escalável e compliance LGPD. Aberto a consultoria em Engenharia de Contexto/Prompt e desafios complexos.',
                     about_focus: 'Inovação Pública & Govtech',
                     about_bio: 'Engenheiro apaixonado por criar soluções técnicas de alto padrão, com forte atuação em inovação pública e tecnologia para governos.',
                     about_edu: 'Formação',
@@ -86,12 +88,14 @@
                     status_available: 'Status: Available',
                     hero_greeting: "Hi, I'm",
                     hero_role: 'Software_Engineer',
+                    hero_role_ia: 'AI_Specialist',
                     hero_cta_projects: '[ Run Projects ]',
                     hero_cta_contact: 'ping --contact',
+                    home_title: 'Start',
                     about_title: 'About_Me',
                     about_profile_role: 'Software Engineer and Systems Analyst and Developer',
                     about_profile_focus: 'Public Innovation & Govtech',
-                    about_profile_bio: 'Engineer passionate about creating high-standard technical solutions, with strong experience in public innovation, artificial intelligence and technology for governments.',
+                    about_profile_bio: '7+ years of experience as a full-stack developer. Specialist in AI, Laravel ecosystem (Filament/Livewire), and Flutter. Focus on public technological innovation: Permanent employee (Science, Technology and Innovation - Gurupi City Hall) & Founder of the govtech startup Axigov. Clean code, scalable architecture, and LGPD compliance. Open to consulting in Context/Prompt Engineering and complex challenges.',
                     about_focus: 'Public Innovation & Govtech',
                     about_bio: 'Engineer passionate about creating high-standard technical solutions, with strong experience in public innovation and technology for governments.',
                     about_edu: 'Education',
@@ -173,35 +177,62 @@
             }
         }));
 
-        Alpine.data('typingEffect', (translationKey) => ({
+        Alpine.data('typingEffect', (keys) => ({
             text: '',
-            translationKey: translationKey,
+            keys: Array.isArray(keys) ? keys : [keys],
+            keyIndex: 0,
             index: 0,
             interval: null,
+            timeout: null,
             init() {
-                // Wait for site ready then wait 150ms
                 this.$watch('siteReady', (value) => {
                     if (value) {
-                        setTimeout(() => this.type(), 150);
+                        this.timeout = setTimeout(() => this.startCycle(), 150);
                     }
                 });
                 this.$watch('lang', () => {
-                    if (this.siteReady) this.type();
+                    if (this.siteReady) this.startCycle();
                 });
             },
-            type() {
+            startCycle() {
+                this.stop();
+                this.keyIndex = 0;
+                this.type();
+            },
+            stop() {
                 if (this.interval) clearInterval(this.interval);
+                if (this.timeout) clearTimeout(this.timeout);
+            },
+            type() {
+                this.stop();
                 this.text = '';
                 this.index = 0;
-                const fullText = this.t(this.translationKey);
+                const fullText = this.t(this.keys[this.keyIndex]);
+                
                 this.interval = setInterval(() => {
                     if (this.index >= fullText.length) {
                         clearInterval(this.interval);
+                        
+                        if (this.keys.length > 1) {
+                            this.timeout = setTimeout(() => this.delete(), 2000);
+                        }
                         return;
                     }
                     this.text += fullText[this.index];
                     this.index++;
                 }, 100);
+            },
+            delete() {
+                this.stop();
+                this.interval = setInterval(() => {
+                    if (this.text.length === 0) {
+                        clearInterval(this.interval);
+                        this.keyIndex = (this.keyIndex + 1) % this.keys.length;
+                        this.timeout = setTimeout(() => this.type(), 500);
+                        return;
+                    }
+                    this.text = this.text.slice(0, -1);
+                }, 50);
             }
         }));
 
@@ -494,7 +525,7 @@
           <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">
             <span x-text="t('hero_greeting')"></span> <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 drop-shadow-[0_0_10px_rgba(0,240,255,0.4)]">Matheus Mariano</span>
           </h1>
-          <div x-data="typingEffect('hero_role')">
+          <div x-data="typingEffect(['hero_role', 'hero_role_ia'])">
             <p class="text-xl md:text-2xl text-slate-400 mb-8 font-mono border-l-2 border-cyan-500 pl-4">
               > <span x-text="text"></span><span class="animate-pulse text-cyan-400">_</span>
             </p>
@@ -512,7 +543,7 @@
           <div class="relative group">
             <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
             <div class="w-80 h-80 rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 relative">
-              <img src="assets/img/avatar.png" alt="Matheus Mariano" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+              <img src="assets/img/avatar.png" alt="Matheus Mariano" class="w-full h-full object-cover md:grayscale group-hover:grayscale-0 transition-all duration-500">
             </div>
           </div>
         </div>
@@ -779,9 +810,9 @@
             x-transition:enter-start="opacity-0 scale-50"
             x-transition:enter-end="opacity-100 scale-100"
             @click="navigate('next')"
-            class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-all active:scale-90 group">
+            class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full text-slate-400 hover:text-emerald-400 hover:bg-cyan-500/10 transition-all active:scale-90 group">
       <div class="flex flex-col items-center gap-0.5" x-show="active === 'inicio'">
-        <span class="text-[10px] font-mono uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">Start</span>
+        <span x-text="t('home_title')" class="text-[10px] group-hover:text-[13px] font-mono uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">Start</span>
         <i class="fa-solid fa-chevron-down text-sm md:text-base animate-bounce"></i>
       </div>
       <i x-show="active !== 'inicio'" class="fa-solid fa-chevron-down text-sm md:text-base group-hover:translate-y-0.5 transition-transform"></i>
