@@ -17,6 +17,7 @@
             mouseY: 0,
             lang: localStorage.getItem('pref_lang') || (navigator.language.startsWith('pt') ? 'pt' : 'en'),
             year: new Date().getFullYear(),
+            siteReady: false,
             translations: {
                 pt: {
                     nav_home: '~/inicio',
@@ -117,7 +118,7 @@
         Alpine.data('terminalLoader', () => ({
             command: '',
             fullCommand: '',
-            showSite: false,
+            showLoader: true,
             phase: 'typing',
             init() {
                 this.fullCommand = this.t('loader_cmd');
@@ -128,8 +129,12 @@
                         setTimeout(() => {
                             this.phase = 'entering';
                             setTimeout(() => {
-                                this.showSite = true;
+                                this.showLoader = false;
                                 document.body.style.overflow = 'auto';
+                                // Signal that site is revealed
+                                setTimeout(() => {
+                                    this.siteReady = true;
+                                }, 1000); // Wait for transition
                             }, 800);
                         }, 500);
                         return;
@@ -147,8 +152,15 @@
             index: 0,
             interval: null,
             init() {
-                this.type();
-                this.$watch('lang', () => this.type());
+                // Wait for site ready then wait 150ms
+                this.$watch('siteReady', (value) => {
+                    if (value) {
+                        setTimeout(() => this.type(), 150);
+                    }
+                });
+                this.$watch('lang', () => {
+                    if (this.siteReady) this.type();
+                });
             },
             type() {
                 if (this.interval) clearInterval(this.interval);
@@ -372,11 +384,11 @@
 
   <!-- Terminal Loader -->
   <div x-data="terminalLoader" 
-       x-show="!showSite"
+       x-show="showLoader"
        x-transition:leave="transition ease-in duration-1000"
        x-transition:leave-start="opacity-100"
        x-transition:leave-end="opacity-0"
-       :class="showSite ? 'loader-mask hidden' : 'loader-mask'"
+       :class="!showLoader ? 'loader-mask hidden' : 'loader-mask'"
        class="fixed inset-0 z-[100] bg-[#0D1117] flex items-center justify-center font-mono p-6">
     <div class="max-w-2xl w-full">
       <div class="flex items-center gap-2 mb-4 text-sm md:text-base">
