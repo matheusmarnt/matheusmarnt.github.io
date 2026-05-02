@@ -77,7 +77,8 @@
                     game_top: 'TOP_10_AGENTES',
                     game_no_logs: '// Nenhum log encontrado',
                     loader_cmd: 'cd /portfolio',
-                    loader_entering: 'Entrando...'
+                    loader_entering: 'Entrando...',
+                    nav_game: 'Snake_OS'
                 },
                 en: {
                     nav_home: '~/home',
@@ -120,7 +121,8 @@
                     game_top: 'TOP_10_AGENTS',
                     game_no_logs: '// No logs found',
                     loader_cmd: 'cd /portfolio',
-                    loader_entering: 'Entering...'
+                    loader_entering: 'Entering...',
+                    nav_game: 'Snake_OS'
                 }
             },
             t(key) {
@@ -805,9 +807,14 @@
     </section>
 
     <!-- Interactive Terminal Game -->
-    <section id="game" x-intersect.margin.-40%="$dispatch('active-section', 'game')" class="py-12 relative z-10 w-full flex justify-center">
-      <div class="w-full max-w-4xl lg:max-w-6xl px-4 sm:px-6" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
+    <section id="game" x-intersect.margin.-40%="$dispatch('active-section', 'game')" class="py-24 relative overflow-hidden flex justify-center">
+      <div class="max-w-6xl mx-auto px-6 w-full" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
         
+        <div class="flex items-center gap-4 mb-16">
+          <h2 class="text-4xl font-bold font-mono text-white"><span class="text-cyan-400">#</span> <span x-text="t('nav_game')"></span></h2>
+          <div class="h-px bg-slate-800 flex-grow"></div>
+        </div>
+
         <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden">
           <!-- Terminal Header with Score -->
           <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center font-mono text-xs">
