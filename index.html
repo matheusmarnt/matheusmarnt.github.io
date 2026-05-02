@@ -729,12 +729,12 @@
 
     <!-- Interactive Terminal Game -->
     <section class="py-12 relative z-10 w-full flex justify-center">
-      <div class="w-full max-w-4xl px-4 sm:px-6" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
+      <div class="w-full max-w-4xl lg:max-w-6xl px-4 sm:px-6" x-data="snakeGame" x-init="initGame()" @keydown.window="direction($event)">
         
         <div class="bg-[#0D1117] rounded-xl border border-slate-800 shadow-2xl overflow-hidden grid md:grid-cols-3">
           <!-- Game Canvas -->
           <div class="md:col-span-2 relative bg-slate-950 p-2 sm:p-4 flex justify-center items-center border-b md:border-b-0 md:border-r border-slate-800 overflow-hidden">
-            <canvas x-ref="snakeCanvas" width="400" height="400" class="border border-slate-900 rounded max-w-full h-auto aspect-square"></canvas>
+            <canvas x-ref="snakeCanvas" width="550" height="550" class="border border-slate-900 rounded max-w-full md:max-w-[550px] h-auto aspect-square"></canvas>
             
             <div x-show="!playing" x-cloak class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm px-6 text-center">
               <h3 class="text-cyan-400 font-mono text-2xl mb-6 tracking-widest" x-text="t('game_title')"></h3>
