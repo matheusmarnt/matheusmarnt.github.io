@@ -11,13 +11,13 @@ location: Gurupi, Tocantins, Brasil
 
 nav:
   - name: Início
-    link: /
+    link: /#inicio
   - name: Sobre
-    link: /about.html
+    link: /#sobre
   - name: Projetos
-    link: /projects.html
+    link: /#projetos
   - name: Contato
-    link: /contact.html
+    link: /#contato
 
 plugins:
   - jekyll-seo-tag
